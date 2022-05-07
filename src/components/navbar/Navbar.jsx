@@ -72,6 +72,7 @@ const Navbar = () => {
         <div className="gpt3__navbar-links_container">
           <p><Link to="/">Home</Link></p>
           <p><Link to="/activepools">Pools</Link></p>
+          <p><Link to="/inactivepools">Finished</Link></p>
           
         </div>
       </div>
@@ -88,6 +89,7 @@ const Navbar = () => {
           <div className="gpt3__navbar-menu_container-links">
           <p><Link onClick={closeToggleMenu} to="/">Home</Link></p>
           <p><Link onClick={closeToggleMenu} to="/activepools">Pools</Link></p>
+          <p><Link onClick={closeToggleMenu} to="/inactivepools">Finished</Link></p>
           </div>
           <div className="gpt3__navbar-menu_container-links-sign">
             {/* <p>Launch Loan App</p> */}

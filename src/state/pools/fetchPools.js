@@ -40,8 +40,10 @@ export const fetchPoolsBlockLimits = async () => {
 
 
 export const fetchPoolsTotalStaking = async () => {
+
     const nonBnbPools = poolsConfig.filter((p) => p.stakingToken.symbol !== 'BRISE');
     // const bnbPool = poolsConfig.filter((p) => p.stakingToken.symbol === 'BNB');
+
 
     const callsNonBnbPools = nonBnbPools.map((poolConfig) => {
         return {
@@ -60,6 +62,9 @@ export const fetchPoolsTotalStaking = async () => {
     // })
 
     const nonBnbPoolsTotalStaked = await multicall(cakeABI, callsNonBnbPools);
+    if(nonBnbPoolsTotalStaked === undefined){
+        return([]);
+    }
     // const bnbPoolsTotalStaked = await multicall(wbnbABI, callsBnbPools)
 
     return [

@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import "./styles/pool.css";
 
-const Pool = ({ pool, userData, stakedPool, library }) => {
+const InactivePool = ({ pool, userData, stakedPool }) => {
+
     return (
         <div className='pool_container'>
             {/* <h4>Pool Sous ID {pool.sousId}</h4> */}
@@ -19,9 +20,9 @@ const Pool = ({ pool, userData, stakedPool, library }) => {
                 //{userData.stakedBalance !== undefined ? Number(Number(userData.stakedBalance)/(10**pool.stakingToken.decimals)).toFixed(3) : 0}
                 <p><span className="staked-amt">{(Number(Number(stakedPool.totalStaked)/(10**pool.stakingToken.decimals)).toFixed(3))}</span> {pool.stakingToken.symbol} Staked</p>
             }
-            <Link className='pool_select_btn' to={`/pool/${pool.sousId}`}>Select</Link>
+            <Link className='pool_select_btn' to={`/inactivepool/${pool.sousId}`}>Select</Link>
         </div>
     );
 }
 
-export default Pool;
+export default InactivePool;

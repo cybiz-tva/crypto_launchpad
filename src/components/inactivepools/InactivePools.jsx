@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useWeb3React } from '@web3-react/core';
 import { connectorLocalStorageKey } from '../wallet/config';
 import poolsConfig from '../../config/constants/pools';
-import Pool from './Pool';
+import Pool from './InactivePool';
 import { fetchPoolsAllowance, fetchUserBalances, fetchUserPendingRewards, fetchUserStakeBalances } from '../../state/pools/fetchPoolsUser';
 import { fetchPoolsTotalStaking } from '../../state/pools/fetchPools';
 import "./styles/pools.css";
+import InactivePool from './InactivePool';
 
 
-const Pools = ({ login, onDismiss = () => null, logout }) => {
+const InactivePools = ({ login, onDismiss = () => null, logout }) => {
 
-    const { account, library } = useWeb3React();
+    const { active, account, library, connector, activate, deactivate } = useWeb3React();
     
     const [userData, setUserData] = useState([]);
     const [poolsTotalStaked, setPoolsTotalStaked] = useState([]);
@@ -22,7 +23,6 @@ const Pools = ({ login, onDismiss = () => null, logout }) => {
                 try {
                 login(connectorId);
                 window.initWeb3 = library;
-
                 // localStorage.setItem('isWalletConnected', true)
                 } catch (ex) {
                 console.log(ex)
@@ -110,20 +110,18 @@ const Pools = ({ login, onDismiss = () => null, logout }) => {
         <div className='pools_container'>
             <div className='pools_content'>
                 {
-                    poolsConfig.filter(pool => !pool.isFinished).map((pool, index) => (
-                        <Pool
-                            library={library}
+                    poolsConfig.filter(pool => pool.isFinished).map((pool, index) => (
+                        <InactivePool
                             stakedPool={poolsTotalStaked.length > 0 ? (poolsTotalStaked.filter(poolStake => poolStake.sousId === pool.sousId))[0] : [{}]}
                             key={index}
                             pool={pool}
                             userData={userData.filter(data => data.sousId === pool.sousId)}
                         />
                     ))
-                    
                 }
             </div>
         </div>
     );
 };
 
-export default Pools;
+export default InactivePools;

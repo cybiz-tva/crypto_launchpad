@@ -11,7 +11,7 @@ export const approve = async (lpContract, masterChefContract, account) => {
 
 export const sousStake = async (sousChefContract, amount, decimals = 18, account) => {
     return sousChefContract.methods
-        .deposit(new BigNumber(amount).times(BIG_TEN.pow(decimals)).toString())
+        .deposit(new BigNumber(amount).times(BIG_TEN.pow(decimals)).toFixed())
         .send({ from: account, gas: DEFAULT_GAS_LIMIT })
         .on('transactionHash', (tx) => {
         return tx.transactionHash
@@ -33,7 +33,7 @@ export const sousStakeBnb = async (sousChefContract, amount, account) => {
 
 export const sousUnstake = async (sousChefContract, amount, decimals, account) => {
     return sousChefContract.methods
-        .withdraw(new BigNumber(amount).times(BIG_TEN.pow(decimals)).toString())
+        .withdraw(new BigNumber(amount).times(BIG_TEN.pow(decimals)).toFixed())
         .send({ from: account, gas: DEFAULT_GAS_LIMIT })
         .on('transactionHash', (tx) => {
         return tx.transactionHash

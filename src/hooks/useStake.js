@@ -14,6 +14,7 @@ export const useSousStake = (sousId, isUsingBnb = false) => {
         // if (sousId === 0) {
         //     await stake(masterChefContract, 0, amount, account)
         // } else 
+        console.log(typeof amount)
         if (isUsingBnb) {
             await sousStakeBnb(sousChefContract, amount, account)
         } else {

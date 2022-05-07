@@ -17,7 +17,7 @@ import toast from 'react-hot-toast';
 import useWindowDimensions from '../../hooks/useWindowDimensions';
 
 
-const PoolDetail = ({pool}) => {
+const InactivePoolDetail = ({pool}) => {
     const { active, account } = useWeb3React();
     const { login } = useAuth();
     const { width: windowWidth } = useWindowDimensions();    
@@ -25,28 +25,28 @@ const PoolDetail = ({pool}) => {
     const [stakeAmt, setStakeAmt] = useState('');
     const [unstakeAmt, setUnstakeAmt] = useState('');
     const [userData, setUserData] = useState({});
-    // const [openWalletModal, setOpenWalletModal] = useState(false);
-    const [approveLoading, setApproveLoading] = useState(false);
+    // const [approveLoading, setApproveLoading] = useState(false);
     const [stakeLoading, setStakenLoading] = useState(false);
-    const [unstakeLoading, setUnstakenLoading] = useState(false);
+    const [emmergencyUnstakeLoading, setEmmergencyUnstakenLoading] = useState(false);
     const [harvestLoading, setHarvestLoading] = useState(false);
     const [userdataLoading, setUserdataLoading] = useState(false);
 
     
-    // Approve
     const { sousId, stakingToken, earningToken } = pool;
-    const stakingTokenContract = useERC20(stakingToken.address ? getAddress(stakingToken.address) : '');
-    const { handleApprove, requestedApproval } = useSousApprove(stakingTokenContract, sousId, earningToken.symbol);
-    const handleTokenApproval = async() => {
-        try {
-            setApproveLoading(true);
-            await handleApprove();
-            setApproveLoading(false);
-        } catch (error) {
-            setApproveLoading(false);
-            (() => toast.error("Not approved"))();
-        }
-    }
+
+    // Approve
+    // const stakingTokenContract = useERC20(stakingToken.address ? getAddress(stakingToken.address) : '');
+    // const { handleApprove, requestedApproval } = useSousApprove(stakingTokenContract, sousId, earningToken.symbol);
+    // const handleTokenApproval = async() => {
+    //     try {
+    //         setApproveLoading(true);
+    //         await handleApprove();
+    //         setApproveLoading(false);
+    //     } catch (error) {
+    //         setApproveLoading(false);
+    //         (() => toast.error("Not approved"))();
+    //     }
+    // }
     
     // Stake
     const { onStake } = useSousStake(sousId, false);
@@ -63,7 +63,6 @@ const PoolDetail = ({pool}) => {
             setStakenLoading(true);
             await onStake(stakeAmt.toString(), stakingToken.decimals);
             setStakenLoading(false);
-            await loadUserData();
             (() => toast.success("Stake successful"))();
             setStakeAmt('');
         } catch (error) {
@@ -92,22 +91,32 @@ const PoolDetail = ({pool}) => {
     const { onUnstake } = useSousUnstake(sousId);
     const handleUnstake = async() => {
         try {
-            
-            if(Number(unstakeAmt) === 0){
-                return;
-            }
-            setUnstakenLoading(true);
-            if(Number(unstakeAmt) > Number(userData.stakedBalance)){
-                await onUnstake(userData.stakedBalance, stakingToken.decimals)
-            }else{
-                await onUnstake(unstakeAmt, stakingToken.decimals)
-            }
-            setUnstakenLoading(false);
-            (() => toast.success("Withdrawal successful"))();
-            setUnstakeAmt('');
+            setEmmergencyUnstakenLoading(true);
+            await onUnstake(Number(Number(userData.stakedBalance)/(10**pool.stakingToken.decimals)).toFixed(), stakingToken.decimals)
+            setEmmergencyUnstakenLoading(false);
             await loadUserData();
+            (() => toast.success("Withdrawal successful"))();
         } catch (error) {
-            setUnstakenLoading(false);
+            console.log(error);
+            setEmmergencyUnstakenLoading(false);
+            (() => toast.error("Not withdrawn"))();
+            
+        }
+
+    }
+
+    // Emergency Unstake/withdraw
+    const { onUnstake: onEmmergencyUnstake } = useSousUnstake(sousId, true);
+    const handleEmmergencyUnstake = async() => {
+        try {
+            setEmmergencyUnstakenLoading(true);
+            await onEmmergencyUnstake(Number(Number(userData.stakedBalance)/(10**pool.stakingToken.decimals)).toFixed(), stakingToken.decimals)
+            setEmmergencyUnstakenLoading(false);
+            await loadUserData();
+            (() => toast.success("Withdrawal successful"))();
+        } catch (error) {
+            console.log(error);
+            setEmmergencyUnstakenLoading(false);
             (() => toast.error("Not withdrawn"))();
             
         }
@@ -120,11 +129,7 @@ const PoolDetail = ({pool}) => {
         }
     }
 
-    const handleUnstakeAmtInput = (e) => {
-        if(!isNaN(e.target.value) || e.target.value === '.'){
-            setUnstakeAmt(e.target.value);
-        }
-    }
+   
 
     const loadUserData = async() => {
         const stakingTokenBalances = await fetchUserBalances(account);
@@ -160,22 +165,8 @@ const PoolDetail = ({pool}) => {
                 if(account !== undefined){
                     try {
                         setUserdataLoading(true);
-                        // const loadUserData = async() => {
-                        //     const stakingTokenBalances = await fetchUserBalances(account);
-                        //     const allowances = await fetchPoolsAllowance(account);
-                        //     const stakedBalances = await fetchUserStakeBalances(account);
-                        //     const pendingRewards = await fetchUserPendingRewards(account);
-                        //     const userData = ({
-                        //         sousId: pool.sousId,
-                        //         allowance: allowances[pool.sousId],
-                        //         stakingTokenBalance: stakingTokenBalances[pool.sousId],
-                        //         stakedBalance: stakedBalances[pool.sousId],
-                        //         pendingReward: pendingRewards[pool.sousId],
-                        //     });
-                        //     setUserData(userData);
-                            
-                        // }
-                        await loadUserData();
+                        
+                        await loadUserData(account);
                         setUserdataLoading(false);
                     } catch (error) {
                         console.log(error);
@@ -189,34 +180,20 @@ const PoolDetail = ({pool}) => {
         )();
     }, [account]);
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {  //assign interval to a variable to clear it.
-            (
-                async () => {
-                    if(account !== undefined){
-                        try {
-                            console.log('Rendered...');
-                            await loadUserData();
-                        } catch (error) {
-                            console.log(error);
-                        }
-                    }
-                    
-                }
-            )();
-        }, 15000)
-        
-        return () => clearInterval(intervalId); //This is important
     
-    }, [])
 
+    const headerStyle = {
+        marginTop: '10px'
+    };
     return (
         <div className="pooldetail_container">
             {
                 windowWidth < 1050 &&
-                <Link className="go_back" to="/activepools">Goto pools</Link>
+                <Link className="go_back" to="/inactivepools">Goto Finished pools</Link>
             }
+            <h4 style={headerStyle}>Finished Pool</h4>
             <div className="pooldetail_content">
+
             </div>
             {
                 (!active || isEmpty(userData))
@@ -248,9 +225,7 @@ const PoolDetail = ({pool}) => {
                             :
                             <>
                                 <div className='userdata'>
-                                    {/* <p className='amt_staked'>Amount Staked {`${userData.stakedBalance}`} {`${pool.stakingToken.symbol`} </p> */}
                                     <p>Amount Staked: {userData.stakedBalance !== undefined ? Number(Number(userData.stakedBalance)/(10**pool.stakingToken.decimals)).toFixed(3) : 0} {pool.stakingToken.symbol}</p>
-                                    {/* <p className='amt_earned'>Earned {`${userData.pendingReward} ${pool.earningToken.symbol}`} </p> */}
                                     <p className='amt_earned'>Earned: {userData.pendingReward !== undefined ? Number(Number(userData.pendingReward)/(10**pool.earningToken.decimals)).toFixed(3) : 0} {pool.earningToken.symbol} </p>
                                 </div>
                                 {
@@ -260,26 +235,12 @@ const PoolDetail = ({pool}) => {
                                         <button disabled={harvestLoading} className='harvest_btn' onClick={handleHarvest}>{harvestLoading ? "Loading..." : "Harvest"}</button>
                                     </div>
                                 }
-                                {
-                                    (
-                                        Number(userData.allowance) > 0
-                                        ?
-                                        <div className='stake_pad'>
-                                            <input value={stakeAmt} onChange={handleStakeAmtInput}/>
-                                            <p>Balance: {Number(Number(userData.stakingTokenBalance)/(10**pool.stakingToken.decimals)).toFixed(3)} {pool.stakingToken.symbol} </p>
-                                            <button disabled={stakeLoading} className='stake_btn' onClick={handleStake}>{stakeLoading ? "Loading..." : "Stake"}</button>
-                                        </div>
-                                        :
-                                        <button disabled={requestedApproval} className='approve_btn' onClick={handleTokenApproval}>{approveLoading ? "Loading...": "Approve pool"}</button>
-                                    )
-                                }
 
                                 {
                                     Number(userData.stakedBalance) > 0
                                     &&
                                     <div className='withdraw_pad'>
-                                        <input value={unstakeAmt} onChange={handleUnstakeAmtInput}/>
-                                        <button disabled={unstakeLoading} className='withdraw_btn' onClick={handleUnstake}>{unstakeLoading ? "Loading..." : "Withdraw"}</button>
+                                        <button disabled={emmergencyUnstakeLoading} className='withdraw_btn' onClick={sousId === 3 ? handleUnstake : handleEmmergencyUnstake}>{emmergencyUnstakeLoading ? "Loading..." : "Withdraw"}</button>
                                     </div>
 
                                 }
@@ -297,4 +258,4 @@ const PoolDetail = ({pool}) => {
     );
 }
 
-export default PoolDetail;
+export default InactivePoolDetail;

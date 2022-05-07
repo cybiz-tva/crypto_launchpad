@@ -10,6 +10,8 @@ import './App.css';
 import Home from './Pages/Home';
 import ActivePools from './Pages/ActivePools';
 import ShowPool from './Pages/ShowPool';
+import FinishedPools from './Pages/FinishedPools';
+import ShowInactivePool from './Pages/ShowInactivePool';
 
 const App = () => {
 
@@ -47,11 +49,13 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/activepools" element={<ActivePools />} />
+          <Route path="/inactivepools" element={<FinishedPools />} />
+          <Route path="/inactivepool/:sousId" element={<ShowInactivePool />} />
           <Route path="/pool/:sousId" element={<ShowPool />} />
         </Routes>
-        <div style={{ position: 'relative'}}>
-          <Footer />
-        </div>
+        {/* <div style={{ position: 'relative'}}>
+        </div> */}
+       {/* <Footer /> */}
         <Toaster toastOptions={tOptions} />
       </BrowserRouter>
     </div>

@@ -35,6 +35,17 @@ const tokens = {
       decimals: 18,
       projectLink: 'https://brisepad.com/',
     },
+    vef: {
+      symbol: 'VEF',
+      address: {
+        56: '',
+        97: '',
+        32520: '0xD6447d2fA919811c41a064bDbdaB1E281F8de9B2'
+      },
+      decimals: 18,
+      projectLink: 'https://brisepad.com/',
+    },
+    
     fswap: {
       symbol: 'FSWAP',
       address: {
